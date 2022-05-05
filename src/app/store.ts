@@ -1,9 +1,16 @@
-import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-import counterReducer from '../features/counter/counterSlice';
+import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
+import counterReducer from "../features/counter/counterSlice";
+import { lessonsSlice } from "../features/counter/lesson/lessonSlice";
+import { questionsSlice } from "../features/counter/questions/questionsSlice";
+
+import { userSlice } from "../features/counter/user/userSlice";
 
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
+    user: userSlice.reducer,
+    lessons: lessonsSlice.reducer,
+    questions: questionsSlice.reducer,
   },
 });
 

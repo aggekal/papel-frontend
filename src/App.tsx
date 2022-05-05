@@ -1,58 +1,164 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { Route, Routes, useNavigate } from "react-router-dom";
+import { AppDispatch } from "./app/store";
+import ChangePass from "./components/ChangePass";
+import Forbidden from "./components/Forbidden";
+import ForgotPass from "./components/ForgotPass";
+import Header from "./components/Header";
+import LoginForm from "./components/LoginFormx";
+import NoMatch from "./components/NoMatch";
+import RegisterForm from "./components/RegisterForm";
+import {
+  checkUserSession,
+  clearState,
+  getState,
+  loginUser,
+  userSelector,
+} from "./features/counter/user/userSlice";
+import InstructorMain from "./Pages/InstructorMain";
+import StudentMain from "./Pages/StudentMain";
+import { USER } from "./types/userTypes";
+import "@material-tailwind/react/tailwind.css";
+//import { Counter } from "./features/counter/Counter";
 
-function App() {
+const App: React.FC = () => {
+  const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [status, setStatus] = useState<number | null>(null);
+  const { isSuccess, isError, errorMessage, role, username, isSessionValid } =
+    useSelector(userSelector);
+
+  const Login = (details: { username: string; password: string }): void => {
+    dispatch(loginUser(details));
+  };
+  const Register = (details: {
+    name: string;
+    surname: string;
+    email: string;
+    phone: string;
+    role: USER;
+    registerNumber?: string;
+    username: string;
+    password: string;
+    passwordConfirmation: string;
+  }): void => {
+    setLoading(true);
+    const requestData = {
+      name: details.name,
+      surname: details.surname,
+      email: details.email,
+      password: details.password,
+      passwordConfirmation: details.passwordConfirmation,
+      role: details.role,
+      phoneNumber: details.phone,
+      username: details.username,
+      registerNumber: details.registerNumber,
+    };
+    if (requestData.registerNumber?.length === 0) {
+      delete requestData.registerNumber;
+    }
+    axios({
+      method: "post",
+      url: "http://localhost:1337/api/users",
+      data: requestData,
+      headers: {
+        "content-type": "application/json",
+      },
+    })
+      .then(function (response) {
+        console.log(response);
+        setLoading(false);
+        if (response.status === 200) {
+          setStatus(response.status);
+        }
+      })
+      .catch(function (error) {
+        setLoading(false);
+        const errorMessage = error.response.data.map(
+          (error: any) => error.message + "\n"
+        );
+        setError(errorMessage);
+      });
+  };
+
+  useEffect(() => {
+    if (localStorage.getItem("userInfo")) {
+      const userInfo = localStorage.getItem("userInfo");
+      if (userInfo) {
+        const parsedUserInfo = JSON.parse(userInfo);
+        dispatch(
+          checkUserSession({
+            userId: parsedUserInfo.user._id,
+            accessToken: parsedUserInfo.accessToken,
+            refreshToken: parsedUserInfo.refreshToken,
+          })
+        );
+      }
+    }
+    if (isSessionValid) {
+      if (localStorage.getItem("userInfo")) {
+        const userInfo = localStorage.getItem("userInfo");
+        if (userInfo) {
+          const parsedUserInfo = JSON.parse(userInfo);
+          dispatch(getState(parsedUserInfo));
+        }
+      }
+    }
+
+    return () => {
+      dispatch(clearState());
+    };
+  }, [dispatch, isSessionValid]);
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(errorMessage);
+      dispatch(clearState());
+    }
+    if (isSuccess) {
+      dispatch(clearState());
+      if (role === USER.STUDENT) navigate("/student_main");
+      if (role === USER.INSTRUCTOR) navigate("/instructor_main");
+    }
+  }, [dispatch, errorMessage, isError, isSuccess, navigate, role]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
+    <div className="font-body h-screen">
+      <Header />
+      <Routes>
+        <Route path="/" element={<LoginForm Login={Login} error={error} />} />
+        <Route
+          path="register"
+          element={
+            <RegisterForm
+              Register={Register}
+              error={error}
+              loading={loading}
+              status={status}
+            />
+          }
+        />
+        <Route path="forgot_pass" element={<ForgotPass />} />
+        <Route path="change_pass" element={<ChangePass />} />
+        {username ? (
+          <Route path="student_main" element={<StudentMain />} />
+        ) : (
+          <Route path="error" element={<Forbidden />} />
+        )}
+        {username ? (
+          <Route path="instructor_main" element={<InstructorMain />} />
+        ) : (
+          <Route path="error" element={<Forbidden />} />
+        )}
+        <Route path="*" element={<NoMatch />} />
+      </Routes>
     </div>
   );
-}
+};
 
 export default App;
