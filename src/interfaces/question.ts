@@ -42,6 +42,13 @@ export interface QuestionsQuery {
   lessonId: string;
 }
 
+export interface QuestionsFilterQuery {
+  filter: string;
+  lessonId: string;
+  category: string | undefined;
+  difficulty: string | undefined;
+}
+
 export interface QuestionSuccessResponse {
   data: QuestionRequestBody;
   status: number;

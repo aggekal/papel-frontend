@@ -18,10 +18,11 @@ import {
   loginUser,
   userSelector,
 } from "./features/counter/user/userSlice";
-import InstructorMain from "./Pages/InstructorMain";
+import InstructorMainLessons from "./Pages/InstructorMainLessons";
 import StudentMain from "./Pages/StudentMain";
 import { USER } from "./types/userTypes";
 import "@material-tailwind/react/tailwind.css";
+import InstructorMainExams from "./Pages/InstructorMainExams";
 //import { Counter } from "./features/counter/Counter";
 
 const App: React.FC = () => {
@@ -123,7 +124,7 @@ const App: React.FC = () => {
     if (isSuccess) {
       dispatch(clearState());
       if (role === USER.STUDENT) navigate("/student_main");
-      if (role === USER.INSTRUCTOR) navigate("/instructor_main");
+      if (role === USER.INSTRUCTOR) navigate("/instructor_main_lessons");
     }
   }, [dispatch, errorMessage, isError, isSuccess, navigate, role]);
 
@@ -151,7 +152,18 @@ const App: React.FC = () => {
           <Route path="error" element={<Forbidden />} />
         )}
         {username ? (
-          <Route path="instructor_main" element={<InstructorMain />} />
+          <Route
+            path="instructor_main_lessons"
+            element={<InstructorMainLessons />}
+          />
+        ) : (
+          <Route path="error" element={<Forbidden />} />
+        )}
+        {username ? (
+          <Route
+            path="instructor_main_exams"
+            element={<InstructorMainExams />}
+          />
         ) : (
           <Route path="error" element={<Forbidden />} />
         )}

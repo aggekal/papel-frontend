@@ -9,3 +9,9 @@ export enum QUESTION_DIFFICULTIES {
   MEDIUM = "MEDIUM",
   HARD = "HARD",
 }
+
+export enum QUESTION_FILTER {
+  ALL = "ALL",
+  DIFFICULTY = "DIFFICULTY",
+  CATEGORY = "CATEGORY",
+}

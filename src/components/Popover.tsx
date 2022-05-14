@@ -18,10 +18,7 @@ const PopOverWrapper: React.FC<PopOverWrapperProps> = ({ name }) => {
   };
   return (
     <>
-      <div
-        className="px-2 hover:cursor-pointer hover:font-bold"
-        ref={buttonRef}
-      >
+      <div className="px-2 hover:cursor-pointer" ref={buttonRef}>
         {name}
       </div>
 
