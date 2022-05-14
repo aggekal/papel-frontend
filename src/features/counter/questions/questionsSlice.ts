@@ -6,6 +6,7 @@ import {
   QuestionDeleteResponse,
   QuestionProps,
   QuestionRequestBody,
+  QuestionsFilterQuery,
   QuestionsQuery,
   QuestionsResponse,
   QuestionsState,
@@ -82,6 +83,59 @@ export const getQuestions = createAsyncThunk<
     }
   }
 );
+
+/////////////////getQuestionByFilter////////////////////////////////////////////////
+export const getQuestionsByFilter = createAsyncThunk<
+  QuestionsResponse,
+  QuestionsFilterQuery,
+  {
+    rejectValue: ValidationErrors;
+  }
+>("questions/getQuestionsByFilter", async (details, { rejectWithValue }) => {
+  try {
+    const userInfo = localStorage.getItem("userInfo");
+    if (userInfo) {
+      const parsedUserInfo = JSON.parse(userInfo);
+      const token = parsedUserInfo.accessToken;
+      const refresh = parsedUserInfo.refreshToken;
+      console.log("from filter", details);
+      const response = await axios({
+        method: "post",
+        url:
+          details.filter === ("DIFFICULTY" as QUESTION_DIFFICULTIES)
+            ? "http://localhost:1337/api/difficulties"
+            : "http://localhost:1337/api/categories",
+        data:
+          details.filter === ("DIFFICULTY" as QUESTION_DIFFICULTIES)
+            ? {
+                lessonId: details.lessonId,
+                difficulty: details.difficulty,
+              }
+            : {
+                lessonId: details.lessonId,
+                category: details.category,
+              },
+        headers: {
+          "content-type": "application/json",
+          Authorization: "Bearer " + token,
+          "x-refresh": refresh,
+        },
+      });
+
+      const data = response.data;
+      if (response.status === 200) {
+        return data;
+      } else {
+        return rejectWithValue({ data: response.data } as ValidationErrors);
+      }
+    }
+  } catch (e: any) {
+    console.log("Error", e.response.data);
+    return rejectWithValue({ data: e.response.data } as ValidationErrors);
+  }
+});
+
+/////////////////////////////////////////////////////////////////////////////////////
 
 export const createQuestion = createAsyncThunk<
   QuestionSuccessResponse,
@@ -292,6 +346,22 @@ export const questionsSlice = createSlice({
         if (action.payload) state.errorMessage = action.payload.data;
       })
       .addCase(editQuestion.pending, (state) => {
+        state.isFetching = true;
+      })
+
+      .addCase(getQuestionsByFilter.fulfilled, (state, { payload }) => {
+        console.log(payload);
+        state.questions = payload;
+        state.isFetching = false;
+        state.isSuccess = true;
+        return state;
+      })
+      .addCase(getQuestionsByFilter.rejected, (state, action) => {
+        state.isFetching = false;
+        state.isError = true;
+        if (action.payload) state.errorMessage = action.payload.data;
+      })
+      .addCase(getQuestionsByFilter.pending, (state) => {
         state.isFetching = true;
       });
   },

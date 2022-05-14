@@ -17,7 +17,7 @@ import toast from "react-hot-toast";
 import QuestionItem from "../components/Questions/QuestionItem";
 import Spinner from "../components/Spinner";
 
-const InstructorMain: React.FC = () => {
+const InstructorMainLessons: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const {
     isError,
@@ -129,4 +129,4 @@ const InstructorMain: React.FC = () => {
   );
 };
 
-export default InstructorMain;
+export default InstructorMainLessons;

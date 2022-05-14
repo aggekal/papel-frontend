@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AppDispatch } from "../app/store";
 import { logout, userSelector } from "../features/counter/user/userSlice";
+import Button from "./Button";
 import PopOverWrapper from "./Popover";
 
 const Header = (): JSX.Element => {
@@ -31,20 +32,41 @@ const Header = (): JSX.Element => {
   };
   return (
     <div className="flex justify-between p-2 border-b-2 border-y-blue-gray">
-      <div className="font-bold ml-20 text-xl">
+      <div className="font-bold ml-5 text-lg">
         Σύστημα Διαχείρισης και Διεξαγωγής Ηλεκτρονικών Εξετάσεων - ΠΑ.ΠΕΛ.
       </div>
       <div>
         {username && (
-          <div className="flex px-2">
-            <span>Καλώς ήρθες,</span>
-            <PopOverWrapper name={username} />
-            <span
-              className="px-2 hover:underline hover:cursor-pointer font-bold"
-              onClick={() => Logout()}
-            >
-              Έξοδος
-            </span>{" "}
+          <div className="flex">
+            <div className="flex px-5 space-x-2 ">
+              {" "}
+              <Button
+                nav
+                color="bg-blue-gray"
+                text="Μαθήματα"
+                onClick={() =>
+                  navigate("/instructor_main_lessons", { replace: true })
+                }
+              />
+              <Button
+                nav
+                color="bg-blue-gray"
+                text="Εξετάσεις"
+                onClick={() =>
+                  navigate("/instructor_main_exams", { replace: true })
+                }
+              />
+            </div>
+            <div className="flex px-2">
+              <span>Καλώς ήρθες,</span>
+              <PopOverWrapper name={username} />
+              <span
+                className="px-2 hover:underline hover:cursor-pointer font-bold"
+                onClick={() => Logout()}
+              >
+                Έξοδος
+              </span>{" "}
+            </div>
           </div>
         )}
       </div>

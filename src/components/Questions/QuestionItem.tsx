@@ -26,7 +26,6 @@ const QuestionItem: React.FC<QuestionItemProps> = ({ description, _id }) => {
 
   const handleEditClick = () => {
     if (!_id) return;
-    console.log("edit", _id);
     dispatch(setQuestionToEdit(_id));
   };
 

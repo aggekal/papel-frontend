@@ -45,15 +45,13 @@ const CreateQuestion: React.FC<CreateQuestionProps> = ({
 
   const [details, setDetails] = useState(initialState);
   const [availableAnswer, setAvailableAnswer] = useState("");
-  const [correctAnswers, setCorrectAnswers] = useState<string[]>([]);
   const [correctAnswersCount, setCorrectAnwsersCount] = useState(1);
   const [answerModalOpen, setAnswerModal] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(details);
-    console.log(selectedLesson);
     const data = { ...details, lessonId: selectedLesson };
+    console.log(data);
     if (validateQuestionRequestData(data)) tryCreateQuestion(data);
     else {
       toast.error("Παρακαλώ συμπληρώστε τις απαντήσεις");
@@ -62,7 +60,6 @@ const CreateQuestion: React.FC<CreateQuestionProps> = ({
   };
 
   const clear = () => {
-    console.log("clar");
     setDetails(initialState);
     setCorrectAnwsersCount(1);
   };
@@ -76,14 +73,8 @@ const CreateQuestion: React.FC<CreateQuestionProps> = ({
   };
 
   useEffect(() => {
-    setDetails({ ...details, correctAnswers: correctAnswers });
-    console.log("e");
-  }, [correctAnswers]);
-
-  useEffect(() => {
     console.log(details.category);
     setAvailableAnswer("");
-    setCorrectAnswers([]);
     if (details.category === QUESTION_TYPES.TEXT) {
       setCorrectAnwsersCount(0);
     } else if (
@@ -97,8 +88,11 @@ const CreateQuestion: React.FC<CreateQuestionProps> = ({
   }, [details.category]);
 
   const tryCreateQuestion = (data: QuestionRequestBody) => {
-    if (edit) dispatch(editQuestion(data));
-    else dispatch(createQuestion(data));
+    if (edit) {
+      dispatch(editQuestion(data));
+    } else {
+      dispatch(createQuestion(data));
+    }
   };
 
   const validateQuestionRequestData = (data: QuestionRequestBody): boolean => {
@@ -150,14 +144,24 @@ const CreateQuestion: React.FC<CreateQuestionProps> = ({
     setAvailableAnswer("");
   };
 
-  const handleAnswerClick = (correctAnswer: string) => {
-    if (correctAnswers.includes(correctAnswer)) {
-      setCorrectAnswers(
-        correctAnswers.filter((answer) => answer !== correctAnswer)
-      );
-    } else {
-      setCorrectAnswers((prevState) => [...prevState, correctAnswer]);
-    }
+  const isAnswerEnabled = (answer: string): boolean => {
+    return (
+      details.correctAnswers.length < correctAnswersCount ||
+      details.correctAnswers.includes(answer)
+    );
+  };
+
+  const handleAnswerClick = (answer: string) => {
+    if (details.correctAnswers.includes(answer)) {
+      setDetails({
+        ...details,
+        correctAnswers: details.correctAnswers.filter((ans) => ans !== answer),
+      });
+    } else
+      setDetails({
+        ...details,
+        correctAnswers: [...details.correctAnswers, answer],
+      });
   };
   return (
     <LoadingOverlay
@@ -204,7 +208,6 @@ const CreateQuestion: React.FC<CreateQuestionProps> = ({
                     availableAnswers: [],
                     correctAnswers: [],
                   });
-                  setCorrectAnswers([]);
                   setAvailableAnswer("");
                 }}
                 value={details.category}
@@ -293,16 +296,13 @@ const CreateQuestion: React.FC<CreateQuestionProps> = ({
                 }}
               />
             </div>
-            {details.availableAnswers.map((correctAnswer, index) => (
+            {details.availableAnswers.map((answer, index) => (
               <AvailableAnswer
                 key={index}
-                text={correctAnswer}
-                isPressed={details.correctAnswers.includes(correctAnswer)}
-                enabled={
-                  details.correctAnswers.length < correctAnswersCount ||
-                  correctAnswers.includes(correctAnswer)
-                }
-                onClick={() => handleAnswerClick(correctAnswer)}
+                text={answer}
+                isPressed={details.correctAnswers.includes(answer)}
+                enabled={isAnswerEnabled(answer)}
+                onClick={() => handleAnswerClick(answer)}
               />
             ))}
             <button

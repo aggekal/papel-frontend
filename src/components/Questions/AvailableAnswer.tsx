@@ -12,14 +12,10 @@ const AvailableAnswer: React.FC<AvailableAnswerProps> = ({
   enabled,
   isPressed,
 }) => {
-  const [selected, setSelected] = useState(false);
+  const [selected, setSelected] = useState(isPressed);
   const toggleSelected = () => {
     setSelected(!selected);
   };
-
-  useEffect(() => {
-    if (isPressed) toggleSelected();
-  }, []);
 
   return (
     <div className="flex">
