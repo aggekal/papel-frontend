@@ -3,11 +3,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AppDispatch } from "../app/store";
 import { logout, userSelector } from "../features/counter/user/userSlice";
+import { USER } from "../types/userTypes";
 import Button from "./Button";
 import PopOverWrapper from "./Popover";
 
 const Header = (): JSX.Element => {
-  const { username, accessToken, refreshToken } = useSelector(userSelector);
+  const { username, accessToken, refreshToken, role } =
+    useSelector(userSelector);
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const Logout = () => {
@@ -36,10 +38,9 @@ const Header = (): JSX.Element => {
         Σύστημα Διαχείρισης και Διεξαγωγής Ηλεκτρονικών Εξετάσεων - ΠΑ.ΠΕΛ.
       </div>
       <div>
-        {username && (
-          <div className="flex">
+        <div className="flex">
+          {username && role === USER.INSTRUCTOR && (
             <div className="flex px-5 space-x-2 ">
-              {" "}
               <Button
                 nav
                 color="bg-blue-gray"
@@ -57,18 +58,18 @@ const Header = (): JSX.Element => {
                 }
               />
             </div>
-            <div className="flex px-2">
-              <span>Καλώς ήρθες,</span>
-              <PopOverWrapper name={username} />
-              <span
-                className="px-2 hover:underline hover:cursor-pointer font-bold"
-                onClick={() => Logout()}
-              >
-                Έξοδος
-              </span>{" "}
-            </div>
+          )}
+          <div className="flex px-2">
+            <span>Καλώς ήρθες,</span>
+            <PopOverWrapper name={username} />
+            <span
+              className="px-2 hover:underline hover:cursor-pointer font-bold"
+              onClick={() => Logout()}
+            >
+              Έξοδος
+            </span>{" "}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

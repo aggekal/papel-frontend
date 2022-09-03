@@ -20,6 +20,7 @@ const initialState: ExamState = {
   isSuccess: false,
   isError: false,
   errorMessage: [],
+  availableExams: [],
 };
 
 export const createExam = createAsyncThunk<
@@ -53,6 +54,43 @@ export const createExam = createAsyncThunk<
           "x-refresh": refresh,
         },
         data: toSend,
+      });
+
+      const data = response.data;
+      if (response.status === 200) {
+        return data;
+      } else {
+        return rejectWithValue({ data: response.data } as ValidationErrors);
+      }
+    }
+  } catch (e: any) {
+    console.log("Error", e.response.data);
+    return rejectWithValue({ data: e.response.data } as ValidationErrors);
+  }
+});
+
+export const getExamsPerLesson = createAsyncThunk<
+  any,
+  string,
+  {
+    rejectValue: ValidationErrors;
+  }
+>("exams/getExamsPerLesson", async (lesson, { rejectWithValue }) => {
+  try {
+    const userInfo = localStorage.getItem("userInfo");
+    if (userInfo) {
+      const parsedUserInfo = JSON.parse(userInfo);
+      const token = parsedUserInfo.accessToken;
+      const refresh = parsedUserInfo.refreshToken;
+
+      const response = await axios({
+        method: "get",
+        url: `http://localhost:1337/api/get_exams_per_lesson/${lesson}`,
+        headers: {
+          "content-type": "application/json",
+          Authorization: "Bearer " + token,
+          "x-refresh": refresh,
+        },
       });
 
       const data = response.data;
@@ -129,9 +167,25 @@ export const examsSlice = createSlice({
       })
       .addCase(createExam.pending, (state) => {
         state.isFetching = true;
+      })
+      .addCase(getExamsPerLesson.fulfilled, (state, { payload }) => {
+        console.log(payload);
+        state.availableExams = payload;
+        state.isFetching = false;
+        return state;
+      })
+      .addCase(getExamsPerLesson.rejected, (state, action) => {
+        state.isFetching = false;
+        state.isError = true;
+        if (action.payload) state.errorMessage = action.payload.data;
+      })
+      .addCase(getExamsPerLesson.pending, (state) => {
+        state.isFetching = true;
       });
   },
 });
 export const { clearState, addQuestion, addOptions, tryCreateExam } =
   examsSlice.actions;
 export const examsSelector = (state: RootState) => state.exams;
+export const examsPerLessonSelector = (state: RootState) =>
+  state.exams.availableExams;

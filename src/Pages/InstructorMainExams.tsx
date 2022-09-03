@@ -15,6 +15,7 @@ import {
 import { SELECTION } from "../types/selectionTypes";
 import toast from "react-hot-toast";
 import RandomExam from "../components/Exams/RandomExam";
+import AvailableExams from "../components/Exams/AvailableExams";
 
 const InstructorMainExams = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -82,6 +83,7 @@ const InstructorMainExams = () => {
         <div className="bg-white col-span-3 row-span-14">
           {view === SELECTION.NEW_EXAM && <CreateExam />}
           {view === SELECTION.NEW_RANDOM_EXAM && <RandomExam />}
+          {view === SELECTION.AVAILABLE_EXAMS && <AvailableExams />}
         </div>
         <div className="bg-white col-span-1 row-span-14">
           {view === SELECTION.AVAILABLE_EXAMS && selectedLesson && (

@@ -1,6 +1,7 @@
 import { EXAM_STATUS } from "../types/examTypes";
 
 export interface ExamState {
+  availableExams: Exam[];
   questions: string[];
   start: string;
   maxScore: string;
@@ -23,4 +24,11 @@ export interface CreateExamResponse {
 export interface ValidationErrors {
   data: string[];
   field_errors: Record<string, string>;
+}
+
+export interface Exam {
+  startDate: Date;
+  questions: string[];
+  maxScore: number;
+  status: string;
 }
