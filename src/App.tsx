@@ -146,12 +146,12 @@ const App: React.FC = () => {
         />
         <Route path="forgot_pass" element={<ForgotPass />} />
         <Route path="change_pass" element={<ChangePass />} />
-        {username ? (
+        {username && role === USER.STUDENT ? (
           <Route path="student_main" element={<StudentMain />} />
         ) : (
           <Route path="error" element={<Forbidden />} />
         )}
-        {username ? (
+        {username && role === USER.INSTRUCTOR ? (
           <Route
             path="instructor_main_lessons"
             element={<InstructorMainLessons />}
@@ -159,7 +159,7 @@ const App: React.FC = () => {
         ) : (
           <Route path="error" element={<Forbidden />} />
         )}
-        {username ? (
+        {username && role === USER.INSTRUCTOR ? (
           <Route
             path="instructor_main_exams"
             element={<InstructorMainExams />}
